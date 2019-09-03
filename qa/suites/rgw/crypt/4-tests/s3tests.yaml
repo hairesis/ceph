@@ -1,0 +1,4 @@
+tasks:
+- s3tests:
+    client.0:
+      kms_key: my-key-1
