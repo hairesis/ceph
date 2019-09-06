@@ -7,22 +7,8 @@ tasks:
     client.0:
       sha1: 12.0.0.0b2
       force-branch: master
-      tenants:
-        - name: admin
-          description:  Admin Tenant
-      users:
-        - name: admin
-          password: ADMIN
-          project: admin
-      roles: [ name: admin, name: Member ]
-      role-mappings:
-        - name: admin
-          user: admin
-          project: admin
+      roles: [ name: Member ]
       services:
-        - name: keystone
-          type: identity
-          description: Keystone Identity Service
         - name: swift
           type: object-store
           description: Swift Service

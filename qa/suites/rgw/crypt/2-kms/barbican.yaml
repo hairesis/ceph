@@ -11,8 +11,6 @@ tasks:
       sha1: 12.0.0.0b2
       force-branch: master
       tenants:
-        - name: admin
-          description:  Admin Tenant
         - name: rgwcrypt
           description: Encryption Tenant
         - name: barbican
@@ -20,9 +18,6 @@ tasks:
         - name: s3
           description: S3 project
       users:
-        - name: admin
-          password: ADMIN
-          project: admin
         - name: rgwcrypt-user
           password: rgwcrypt-pass
           project: rgwcrypt
@@ -32,11 +27,8 @@ tasks:
         - name: s3-user
           password: s3-pass
           project: s3
-      roles: [ name: admin, name: Member, name: creator ]
+      roles: [ name: Member, name: creator ]
       role-mappings:
-        - name: admin
-          user: admin
-          project: admin
         - name: Member
           user: rgwcrypt-user
           project: rgwcrypt
@@ -47,9 +39,6 @@ tasks:
           user: s3-user
           project: s3
       services:
-        - name: keystone
-          type: identity
-          description: Keystone Identity Service
         - name: swift
           type: object-store
           description: Swift Service
