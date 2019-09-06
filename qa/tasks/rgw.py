@@ -113,6 +113,7 @@ def start_rgw(ctx, config, clients):
         if client_config.get('dns-s3website-name'):
             rgw_cmd.extend(['--rgw-dns-s3website-name', endpoint.website_dns_name])
 
+        vault_config = client_config.get('vault')
         barbican_role = client_config.get('use-barbican-role', None)
         if barbican_role is not None:
             if not hasattr(ctx, 'barbican'):
@@ -135,6 +136,18 @@ def start_rgw(ctx, config, clients):
                 '--rgw_keystone_barbican_password', access_data['password'],
                 '--rgw_keystone_barbican_tenant', access_data['tenant'],
                 ])
+        elif vault_config is not None:
+            try:
+                rgw_cmd.extend([
+                    '--rgw_crypt_kms_backend vault',
+                    '--rgw_crypt_kms_vault_auth token',
+                    '--rgw_crypt_kms_vault_addr', vault_config['listen_address'],
+                    '--rgw_crypt_kms_vault_token_file', '<(echo {})'.format(vault_config['root_token'])
+                    ]
+                )
+            except KeyError:
+                raise ConfigError('Vault KMS backend: "listen_address" or "token_file" are not specified')
+
 
         rgw_cmd.extend([
             '--foreground',
