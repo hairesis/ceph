@@ -8,7 +8,6 @@ import logging
 
 import httplib
 import json
-import urlparse
 
 from teuthology import misc as teuthology
 from teuthology import contextutil
@@ -17,6 +16,22 @@ from teuthology.exceptions import ConfigError
 
 
 log = logging.getLogger(__name__)
+
+
+
+def assign_ports(ctx, config, initial_port):
+    """
+    Assign port numbers starting from @initial_port
+    """
+    port = initial_port
+    role_endpoints = {}
+    for remote, roles_for_host in ctx.cluster.remotes.iteritems():
+        for role in roles_for_host:
+            if role in config:
+                role_endpoints[role] = (remote.name.split('@')[1], port)
+                port += 1
+
+    return role_endpoints
 
 
 @contextlib.contextmanager
@@ -68,20 +83,24 @@ def get_vault_dir(ctx):
 @contextlib.contextmanager
 def run_vault(ctx, config):
     assert isinstance(config, dict)
-    log.info('Running vault...')
 
     for (client, cconf) in config.items():
         (remote,) = ctx.cluster.only(client).remotes.iterkeys()
         cluster_name, _, client_id = teuthology.split_role(client)
 
+        listen_addr = "{}:{}".format(*ctx.vault.endpoints[client])
+
+        root_token, ctx.vault.root_token = cconf.get('root_token', 'root')
+
+        log.info("Starting Vault listening on %s ...", listen_addr)
         v_params = [
             '-dev',
-            '-dev-listen-address={}'.format(cconf.get("listen_address", "localhost:8200")),
+            '-dev-listen-address={}'.format(listen_addr),
             '-dev-no-store-token',
-            '-dev-root-token-id={}'.format(cconf.get('root_token', 'root'))
+            '-dev-root-token-id={}'.format(root_token)
         ]
 
-        cmd = 'cd ' + "{}/vault/".format(get_vault_dir(ctx)) + ' && ' + "./vault server {} &".format(" ".join(v_params))
+        cmd = 'cd ' + "{}/vault/".format(get_vault_dir(ctx)) + ' && ' + "./vault server {}".format(" ".join(v_params))
 
         ctx.daemons.add_daemon(
             remote, 'vault', client_id,
@@ -106,6 +125,7 @@ def run_vault(ctx, config):
 def setup_vault(ctx, config):
     """
     Mount simple kv Secret Engine
+    Note: this will be extended to support transit secret engine
     """
     data = {
         "type": "kv",
@@ -118,7 +138,7 @@ def setup_vault(ctx, config):
 
     log.info('Mount kv secret engine')
 
-    send_req(cconfig, '/v1/sys/mounts/kv', json.dumps(data))
+    send_req(ctx, cconfig, cclient, '/v1/sys/mounts/kv', json.dumps(data))
 
     try:
         yield
@@ -126,13 +146,8 @@ def setup_vault(ctx, config):
         pass
 
 
-def send_req(cconfig, path, body, method='POST'):
-    base_url = cconfig.get('listen_address', 'localhost:8200')
-    if not base_url.startswith('http'):
-        # making sure urlparse can parse the url
-        base_url = "http://{}".format(base_url)
-    parsed_url = urlparse(base_url)
-    host, port = parsed_url.hostname, parsed_url.port
+def send_req(ctx, cconfig, client, path, body, method='POST'):
+    host, port = ctx.vault.endpoints[client]
     req = httplib.HTTPConnection(host, port, timeout=30)
     headers = {'X-Vault-Token': cconfig.get('root_token', 'atoken')}
     req.request(method, path, headers=headers, body=body)
@@ -162,9 +177,10 @@ def create_secrets(ctx, config):
     except KeyError:
         raise ConfigError('vault.secrets must have "path" field')
 
-    send_req(cconfig, '/v1/{}'.format(path), json.dumps(data))
+    send_req(ctx, cconfig, cclient, '/v1/{}'.format(path), json.dumps(data))
 
     log.info("secrets created")
+
     try:
         yield
     except:
@@ -179,18 +195,16 @@ def task(ctx, config):
     Example of configuration:
 
     tasks:
-      - local_cluster:
-          cluster_path: /home/andrea/ceph-1/build
-      - local_rgw:
-      - tox: [ client.0 ]
-      - vault:
-          client.0:
-            version: 1.2.2
-            root_token: test_root_token
-            listen_address: localhost:8200
-            secrets:
-              - path: kv/teuthology/test-1
-                secret: a2V5MS5GcWVxKzhzTGNLaGtzQkg5NGVpb1FKcFpGb2c=
+    - tox: [ client.0 ]
+    - vault:
+        client.0:
+          version: 1.2.2
+          root_token: test_root_token
+          secrets:
+            - path: kv/teuthology/key_a
+              secret: YmluCmJvb3N0CmJvb3N0LWJ1aWxkCmNlcGguY29uZgo=
+            - path: kv/teuthology/key_b
+              secret: aWIKTWFrZWZpbGUKbWFuCm91dApzcmMKVGVzdGluZwo=
     """
     assert config is None or isinstance(config, list)
     all_clients = ['client.{id}'.format(id=id_)
@@ -210,6 +224,8 @@ def task(ctx, config):
     log.debug('Vault config is %s', config)
 
     ctx.vault = argparse.Namespace()
+    ctx.vault.endpoints = assign_ports(ctx, config, 8200)
+    ctx.vault.root_token = None
 
     with contextutil.nested(
         lambda: download(ctx=ctx, config=config),
@@ -218,6 +234,4 @@ def task(ctx, config):
         lambda: create_secrets(ctx=ctx, config=config)
         ):
         yield
-
-
 

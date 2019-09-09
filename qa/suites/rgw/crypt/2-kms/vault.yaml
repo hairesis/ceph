@@ -1,12 +1,16 @@
+overrides:
+  rgw:
+    client.0:
+      use-vault-role: client.0
+
 tasks:
 - tox: [ client.0 ]
 - vault:
     client.0:
       version: 1.2.2
       root_token: test_root_token
-      listen_address: localhost:8200
       secrets:
         - path: kv/teuthology/key_a
-          secret: aFJzLT5lnqC5OOlmwHXF8x3Kdyfr6cFZ51
+          secret: YmluCmJvb3N0CmJvb3N0LWJ1aWxkCmNlcGguY29uZgo=
         - path: kv/teuthology/key_b
-          secret: 2EMFVMYDEgwSbdKdHTeUNFwfa+PwaGbzT9
+          secret: aWIKTWFrZWZpbGUKbWFuCm91dApzcmMKVGVzdGluZwo=
