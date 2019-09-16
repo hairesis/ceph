@@ -5,6 +5,7 @@ Deploy and configure Vault for Teuthology
 import argparse
 import contextlib
 import logging
+import zipfile
 
 import httplib
 import json
@@ -58,7 +59,9 @@ def download(ctx, config):
         ctx.cluster.only(client).run(args=cmd)
 
         log.info('Extracting vault...')
-        cmd = ['unzip', '{tdir}/vault_{version}.zip'.format(tdir=testdir, version=vault_version), '-d','./vault']
+
+        # Using python in case unzip is not installe on the hosts
+        cmd = ['python', '-m' 'zipfile', '{tdir}/vault_{version}.zip'.format(tdir=testdir, version=vault_version), './vault']
         ctx.cluster.only(client).run(args=cmd)
 
     try:
