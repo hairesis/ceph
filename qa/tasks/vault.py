@@ -195,7 +195,6 @@ def task(ctx, config):
     Example of configuration:
 
     tasks:
-    - tox: [ client.0 ]
     - vault:
         client.0:
           version: 1.2.2

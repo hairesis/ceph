@@ -4,7 +4,6 @@ overrides:
       use-vault-role: client.0
 
 tasks:
-- tox: [ client.0 ]
 - vault:
     client.0:
       version: 1.2.2

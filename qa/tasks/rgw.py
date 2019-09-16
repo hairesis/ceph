@@ -138,14 +138,15 @@ def start_rgw(ctx, config, clients):
                 '--rgw_keystone_barbican_tenant', access_data['tenant'],
                 ])
         elif vault_role is not None:
-            if not ctx.vault.root_token:
-                raise ConfigError('vault: no "root_token" specified')
-            rgw_cmd.extend([
-                '--rgw_crypt_kms_backend vault',
-                '--rgw_crypt_kms_vault_auth token',
-                '--rgw_crypt_kms_vault_addr', "{}/{}".format(*ctx.vault.endpoints[vault_role]),
-                '--rgw_crypt_kms_vault_token_file', '<(echo {})'.format(ctx.vault.root_token)
-            ])
+            pass
+            # if not ctx.vault.root_token:
+            #     raise ConfigError('vault: no "root_token" specified')
+            # rgw_cmd.extend([
+            #     '--rgw_crypt_kms_backend vault',
+            #     '--rgw_crypt_kms_vault_auth token',
+            #     '--rgw_crypt_kms_vault_addr', "{}/{}".format(*ctx.vault.endpoints[vault_role]),
+            #     '--rgw_crypt_kms_vault_token_file', '<(echo {})'.format(ctx.vault.root_token)
+            # ])
 
 
         rgw_cmd.extend([
