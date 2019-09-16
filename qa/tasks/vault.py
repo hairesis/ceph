@@ -205,7 +205,6 @@ def task(ctx, config):
             - path: kv/teuthology/key_b
               secret: aWIKTWFrZWZpbGUKbWFuCm91dApzcmMKVGVzdGluZwo=
     """
-    assert config is None or isinstance(config, list)
     all_clients = ['client.{id}'.format(id=id_)
                    for id_ in teuthology.all_roles_of_type(ctx.cluster, 'client')]
     if config is None:
