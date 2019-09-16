@@ -93,7 +93,7 @@ def run_vault(ctx, config):
 
         listen_addr = "{}:{}".format(*ctx.vault.endpoints[client])
 
-        root_token, ctx.vault.root_token = cconf.get('root_token', 'root')
+        root_token = ctx.vault.root_token = cconf.get('root_token', 'root')
 
         log.info("Starting Vault listening on %s ...", listen_addr)
         v_params = [
