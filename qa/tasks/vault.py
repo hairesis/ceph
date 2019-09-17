@@ -104,7 +104,7 @@ def run_vault(ctx, config):
             '-dev-root-token-id={}'.format(root_token)
         ]
 
-        cmd = 'cd ' + "{}/vault/".format(get_vault_dir(ctx)) + ' && ' + "./vault server {}".format(" ".join(v_params))
+        cmd = 'cd ' + "{}/".format(get_vault_dir(ctx)) + ' && ' + "./vault server {}".format(" ".join(v_params))
 
         ctx.daemons.add_daemon(
             remote, 'vault', client_id,
@@ -114,7 +114,7 @@ def run_vault(ctx, config):
             stdin=run.PIPE,
             cwd=get_vault_dir(ctx),
             wait=False,
-            check_status=False,
+            check_status=True,
         )
 
     try:
