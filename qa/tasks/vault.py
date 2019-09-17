@@ -91,7 +91,8 @@ def run_vault(ctx, config):
         (remote,) = ctx.cluster.only(client).remotes.iterkeys()
         cluster_name, _, client_id = teuthology.split_role(client)
 
-        listen_addr = "{}:{}".format(*ctx.vault.endpoints[client])
+        _, port = ctx.vault.endpoints[client]
+        listen_addr = "0.0.0.0:{}".format(port)
 
         root_token = ctx.vault.root_token = cconf.get('root_token', 'root')
 
@@ -152,6 +153,7 @@ def setup_vault(ctx, config):
 def send_req(ctx, cconfig, client, path, body, method='POST'):
     host, port = ctx.vault.endpoints[client]
     req = httplib.HTTPConnection(host, port, timeout=30)
+    log.info("Send request to Vault: %s:%s", host, port)
     headers = {'X-Vault-Token': cconfig.get('root_token', 'atoken')}
     req.request(method, path, headers=headers, body=body)
     resp = req.getresponse()
