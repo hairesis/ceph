@@ -5,7 +5,7 @@ Deploy and configure Vault for Teuthology
 import argparse
 import contextlib
 import logging
-import zipfile
+import time
 
 import httplib
 import json
@@ -118,7 +118,7 @@ def run_vault(ctx, config):
             wait=False,
             check_status=True,
         )
-
+        time.sleep(10)
     try:
         yield
     finally:
