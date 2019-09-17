@@ -61,7 +61,9 @@ def download(ctx, config):
         log.info('Extracting vault...')
 
         # Using python in case unzip is not installe on the hosts
-        cmd = ['python', '-m', 'zipfile', '-e', '{tdir}/vault_{version}.zip'.format(tdir=testdir, version=vault_version), './vault']
+        cmd = ['python', '-m', 'zipfile', '-e',
+               '{tdir}/vault_{version}.zip'.format(tdir=testdir, version=vault_version),
+               '{tdir}/vault'.format(tdir=testdir)]
         ctx.cluster.only(client).run(args=cmd)
 
     try:
@@ -104,7 +106,7 @@ def run_vault(ctx, config):
             '-dev-root-token-id={}'.format(root_token)
         ]
 
-        cmd = 'cd ' + "{}/".format(get_vault_dir(ctx)) + ' && ' + "./vault server {}".format(" ".join(v_params))
+        cmd = "{vdir}/vault server {vargs}".format(vdir=get_vault_dir(ctx), vargs=" ".join(v_params))
 
         ctx.daemons.add_daemon(
             remote, 'vault', client_id,
