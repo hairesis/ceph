@@ -106,7 +106,7 @@ def run_vault(ctx, config):
             '-dev-root-token-id={}'.format(root_token)
         ]
 
-        cmd = "{vdir}/vault server {vargs}".format(vdir=get_vault_dir(ctx), vargs=" ".join(v_params))
+        cmd = "{vdir}/vault server {vargs} && chmod +x {vdir}/vault".format(vdir=get_vault_dir(ctx), vargs=" ".join(v_params))
 
         ctx.daemons.add_daemon(
             remote, 'vault', client_id,
