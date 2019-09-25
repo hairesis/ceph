@@ -106,7 +106,7 @@ def run_vault(ctx, config):
             '-dev-root-token-id={}'.format(root_token)
         ]
 
-        cmd = "chmod +x {vdir}/vault && {vdir}/vault server {vargs}".format(vdir=get_vault_dir(ctx), vargs=" ".join(v_params))
+        cmd = "chmod +x {vdir}/vault && {vdir}/vault server {vargs} & { read; kill %1; }".format(vdir=get_vault_dir(ctx), vargs=" ".join(v_params))
 
         ctx.daemons.add_daemon(
             remote, 'vault', client_id,
@@ -116,7 +116,7 @@ def run_vault(ctx, config):
             stdin=run.PIPE,
             cwd=get_vault_dir(ctx),
             wait=False,
-            check_status=True,
+            check_status=False,
         )
         time.sleep(10)
     try:
