@@ -136,6 +136,7 @@ def start_rgw(ctx, config, clients):
             log.info("Barbican access data: %s",ctx.barbican.token[barbican_role])
             access_data = ctx.barbican.token[barbican_role]
             rgw_cmd.extend([
+                '--rgw_crypt_s3_kms_backend', 'barbican',
                 '--rgw_keystone_barbican_user', access_data['username'],
                 '--rgw_keystone_barbican_password', access_data['password'],
                 '--rgw_keystone_barbican_tenant', access_data['tenant'],
@@ -156,6 +157,7 @@ def start_rgw(ctx, config, clients):
             ])
         elif testing_role is not None:
             rgw_cmd.extend([
+                '--rgw_crypt_s3_kms_backend', 'testing',
                 '--rgw_crypt_s3_kms_encryption_keys', 'testkey-1=YmluCmJvb3N0CmJvb3N0LWJ1aWxkCmNlcGguY29uZgo= testkey-2=aWIKTWFrZWZpbGUKbWFuCm91dApzcmMKVGVzdGluZwo='
             ])
 
