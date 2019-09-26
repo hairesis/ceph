@@ -222,8 +222,8 @@ def configure(ctx, config):
             s3tests_conf['DEFAULT']['kms_keyid2'] = properties['key_path2']
         else:
             # Fallback scenario where it's the local (ceph.conf) kms being tested
-            s3tests_conf['DEFAULT']['kms_keyid'] = 'keytest-1'
-            s3tests_conf['DEFAULT']['kms_keyid2'] = 'keytest-2'
+            s3tests_conf['DEFAULT']['kms_keyid'] = 'testkey-1'
+            s3tests_conf['DEFAULT']['kms_keyid2'] = 'testkey-2'
 
         slow_backend = properties.get('slow_backend')
         if slow_backend:
