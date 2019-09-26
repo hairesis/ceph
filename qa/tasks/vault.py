@@ -63,8 +63,7 @@ def download(ctx, config):
         # Using python in case unzip is not installed on hosts
         cmd = ['python', '-m', 'zipfile', '-e',
                '{tdir}/vault_{version}.zip'.format(tdir=testdir, version=vault_version),
-               '{tdir}/vault'.format(tdir=testdir),
-               '&&', 'rm', '{}/vault_{}.zip'.format(testdir, vault_version)]
+               '{tdir}/vault'.format(tdir=testdir)]
         ctx.cluster.only(client).run(args=cmd)
 
     try:
@@ -77,6 +76,7 @@ def download(ctx, config):
                 args=[
                     'rm',
                     '-rf',
+                    '{tdir}/vault_{version}.zip'.format(tdir=testdir, version=vault_version),
                     '{tdir}/vault'.format(tdir=testdir),
                     ],
                 )
