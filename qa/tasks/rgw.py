@@ -143,16 +143,14 @@ def start_rgw(ctx, config, clients):
             if not ctx.vault.root_token:
                 raise ConfigError('vault: no "root_token" specified')
             # create token on file
-            token_path = teuthology.get_testdir(ctx) + '/vault-token'
-            ctx.cluster.only(client).run(args=['echo', '-n', ctx.vault.root_token, run.Raw('>'), token_path])
             log.info("Token file content")
-            ctx.cluster.only(client).run(args=['cat', token_path])
+            ctx.cluster.only(client).run(args=['cat', run.Raw('<(echo -n {})'.format(ctx.vault.root_token))])
 
             rgw_cmd.extend([
                 '--rgw_crypt_s3_kms_backend', 'vault',
                 '--rgw_crypt_vault_auth', 'token',
                 '--rgw_crypt_vault_addr', "{}:{}".format(*ctx.vault.endpoints[vault_role]),
-                '--rgw_crypt_vault_token_file', token_path
+                '--rgw_crypt_vault_token_file', run.Raw('<(echo -n {})'.format(ctx.vault.root_token))
             ])
         elif testing_role is not None:
             rgw_cmd.extend([
@@ -213,7 +211,6 @@ def start_rgw(ctx, config, clients):
                                                              client=client_with_cluster),
                     ],
                 )
-            ctx.cluster.only(client).run(args=['rm', '-rf', '/tmp/vault-token'])
 
 def assign_endpoints(ctx, config, default_cert):
     role_endpoints = {}
