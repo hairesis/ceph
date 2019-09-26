@@ -103,10 +103,12 @@ def run_vault(ctx, config):
             '-dev',
             '-dev-listen-address={}'.format(listen_addr),
             '-dev-no-store-token',
-            '-dev-root-token-id={}'.format(root_token)
+            '-dev-root-token-id={}'.format(root_token),
+            '&',
+            run.Raw('{ read; kill %1; }')
         ]
 
-        cmd = "chmod +x {vdir}/vault && {vdir}/vault server {vargs} & { read; kill %1; }".format(vdir=get_vault_dir(ctx), vargs=" ".join(v_params))
+        cmd = "chmod +x {vdir}/vault && {vdir}/vault server {vargs}".format(vdir=get_vault_dir(ctx), vargs=" ".join(v_params))
 
         ctx.daemons.add_daemon(
             remote, 'vault', client_id,
