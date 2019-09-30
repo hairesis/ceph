@@ -1,5 +1,6 @@
 tasks:
 - s3tests:
     client.0:
-      force-branch: ceph-master
+      force-branch: wip-sse-kms-tests-refactor
+      git_remote: https://github.com/hairesis/
       kms_key: my-key-1
